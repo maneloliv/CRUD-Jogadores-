@@ -11,8 +11,6 @@
 </head>
 <body class="container py-5">
     <h1 class="text-center mb-4">CRUD de Jogadores</h1>
-
-    <!-- Formulário para adicionar jogadores -->
     <div class="card mb-5 p-4">
         <form id="addPlayerForm" action="php/create.php" method="POST">
             <h3>Adicionar Jogador</h3>
@@ -33,18 +31,19 @@
                         $result = $conn->query("SELECT * FROM Time");
                         while ($row = $result->fetch_assoc()) {
                             echo "<option value='{$row['id_time']}'>{$row['nome_time']}</option>";
+
                         }
                         ?>
                     </select>
                 </div>
                 <div class="col-md-6">
                     <button type="submit" class="btn btn-primary w-100">Adicionar</button>
+                    <button class='btn btn-info w-100 mt-2' data-bs-toggle='modal' data-bs-target='#Timemodal'>Adicionar Time</button>
+
                 </div>
             </div>
         </form>
     </div>
-
-    <!-- Lista de jogadores -->
     <h2 class="mb-4">Jogadores Cadastrados</h2>
     <table class="table table-striped">
         <thead>
@@ -53,12 +52,32 @@
                 <th>Nome</th>
                 <th>Descrição</th>
                 <th>Time</th>
+                <th>Numero de Comentarios</th>
                 <th>Ações</th>
             </tr>
         </thead>
         <tbody>
             <?php
-            $query = "SELECT j.*, t.nome_time FROM Jogador j LEFT JOIN Time t ON j.id_time = t.id_time";
+
+                $query = "
+                SELECT 
+                    j.id_jogador,
+                    j.nome_jogador,
+                    j.descricao,
+                    j.foto,
+                    t.nome_time,
+                    (SELECT COUNT(c.id_comentario) 
+                    FROM comentario c 
+                    WHERE c.id_jogador = j.id_jogador) AS numero_comentarios
+                FROM 
+                    jogador j
+                LEFT JOIN 
+                    time t ON j.id_time = t.id_time
+                GROUP BY 
+                    j.id_jogador
+                ";
+
+            
             $result = $conn->query($query);
 
             while ($row = $result->fetch_assoc()) {
@@ -67,6 +86,9 @@
                         <td>{$row['nome_jogador']}</td>
                         <td>{$row['descricao']}</td>
                         <td>{$row['nome_time']}</td>
+                        <td>{$row['numero_comentarios']}</td>
+                     
+
                         <td>
                             <a href='php/update.php?id={$row['id_jogador']}' class='btn btn-sm btn-warning'>Editar</a>
                             <a href='php/delete.php?id={$row['id_jogador']}' class='btn btn-sm btn-danger'>Excluir</a>
@@ -82,7 +104,7 @@
         </tbody>
     </table>
 
-    <!-- Modal para Adicionar Comentários -->
+    <!-- Modal -->
     <div class="modal fade" id="comentarioModal" tabindex="-1" aria-labelledby="comentarioModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -100,6 +122,31 @@
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-primary">Salvar Comentário</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Modal ADD TIME-->
+    <div class="modal fade" id="Timemodal" tabindex="-1" aria-labelledby="TimemodalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form id="comentarioForm" action="php/add_time.php" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="TimemodalLabel">Adicionar Time</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body mt-3 ">
+                        <input class="w-100 form-control" type="text" id="nome_time" name="nome_time" placeholder="Nome Time" required/>
+                        <div class="mt-3">
+                            <input class="w-100 form-control" type="text" id="cidade" name="cidade" placeholder="Cidade Time" required/>                        
+                        </div>
+                        <div class="mt-3">
+                            <input minlength="4" maxlength="4" class="w-100 form-control" type="number" id="fundacao" name="fundacao" placeholder="Ano fundacao Time" min="1800" max="2024" required />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Salvar Time</button>
                     </div>
                 </form>
             </div>

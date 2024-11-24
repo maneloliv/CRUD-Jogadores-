@@ -2,12 +2,13 @@
 include 'db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $id_jogador = $_POST['id_jogador'];
-    $texto_comentario = $_POST['texto_comentario'];
+    $nome_time = $_POST['nome_time'];
+    $cidade = $_POST['cidade'];
+    $fundacao = $_POST['fundacao'];
 
-    $sql = "INSERT INTO Comentario (id_jogador, texto_comentario) VALUES (?, ?)";
+    $sql = "INSERT INTO Time (nome_time, cidade, fundacao) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("is", $id_jogador, $texto_comentario);
+    $stmt->bind_param("ssi", $nome_time, $cidade, $fundacao);
 
     if ($stmt->execute()) {
         header("Location: ../index.php");
